@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>PT Checkmate 设置</title>
+    <link rel="stylesheet" href="src/ui.css">
+  </head>
+  <body>
+    <main class="optionsShell">
+      <header class="pageHeader">
+        <div>
+          <h1>PT 自动巡检设置</h1>
+          <p>只使用 Chrome 现有登录状态，不保存账号密码。</p>
+        </div>
+        <div class="actionRow">
+          <button id="save" type="button" class="primaryButton">保存并授权</button>
+          <span id="saveState" class="muted"></span>
+        </div>
+      </header>
+
+      <section class="panel">
+        <div class="settingGrid">
+          <label>
+            <span>定时巡检</span>
+            <select id="autoRun">
+              <option value="true">开启</option>
+              <option value="false">关闭</option>
+            </select>
+          </label>
+
+          <label>
+            <span>间隔天数</span>
+            <input id="periodDays" type="number" min="1" max="29" step="1">
+          </label>
+
+          <label>
+            <span>巡检时间</span>
+            <input id="scheduleTime" type="time">
+          </label>
+
+          <label>
+            <span>巡检后关闭标签页</span>
+            <select id="closeTabs">
+              <option value="true">关闭</option>
+              <option value="false">保留</option>
+            </select>
+          </label>
+
+          <label>
+            <span>打开标签页</span>
+            <select id="tabActive">
+              <option value="false">后台打开</option>
+              <option value="true">前台打开</option>
+            </select>
+          </label>
+        </div>
+      </section>
+
+      <section class="sectionHeader">
+        <h2>站点</h2>
+        <button id="addSite" type="button" class="secondaryButton">添加站点</button>
+      </section>
+
+      <form id="siteList" class="siteList"></form>
+
+    </main>
+
+    <template id="siteTemplate">
+      <article class="siteCard">
+        <div class="siteCardHeader">
+          <label class="enabledLine">
+            <input data-field="enabled" type="checkbox">
+            <span>启用</span>
+          </label>
+          <button data-action="remove" type="button" class="textButton">删除</button>
+        </div>
+
+        <div class="formGrid">
+          <label>
+            <span>站点名称</span>
+            <input data-field="name" type="text" placeholder="例如 M-Team">
+          </label>
+
+          <label>
+            <span>首页 URL</span>
+            <input data-field="url" type="url" placeholder="https://example.com/">
+          </label>
+
+          <label>
+            <span>签到页 URL</span>
+            <input data-field="checkInUrl" type="url" placeholder="留空则打开首页">
+          </label>
+
+          <label>
+            <span>等待秒数</span>
+            <input data-field="waitSeconds" type="number" min="0" max="20" step="1" placeholder="3">
+          </label>
+        </div>
+
+        <label>
+          <span>按钮关键词</span>
+          <textarea data-field="keywords" rows="3" placeholder="每行一个，例如：签到"></textarea>
+        </label>
+
+        <label>
+          <span>CSS 选择器</span>
+          <textarea data-field="selectors" rows="3" placeholder="可选；每行一个，例如：button.checkin"></textarea>
+        </label>
+      </article>
+    </template>
+
+    <script src="src/options.js"></script>
+  </body>
+</html>

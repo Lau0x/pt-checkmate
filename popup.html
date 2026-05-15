@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>PT Checkmate</title>
+    <link rel="stylesheet" href="src/ui.css">
+  </head>
+  <body class="popup">
+    <main>
+      <header class="topbar">
+        <div>
+          <h1>PT 巡检</h1>
+          <p id="siteCount">读取中</p>
+        </div>
+        <button id="openOptions" class="iconButton" title="站点配置">设置</button>
+      </header>
+
+      <button id="runNow" class="primaryButton">一键巡检</button>
+      <p id="runState" class="muted">未运行</p>
+
+      <section>
+        <h2>最近结果</h2>
+        <div id="results" class="resultList"></div>
+      </section>
+    </main>
+
+    <script src="src/popup.js"></script>
+  </body>
+</html>

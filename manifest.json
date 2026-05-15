@@ -1,0 +1,24 @@
+{
+  "manifest_version": 3,
+  "name": "PT Checkmate",
+  "version": "0.1.0",
+  "description": "Open configured PT sites on schedule and optionally click check-in buttons.",
+  "permissions": [
+    "alarms",
+    "scripting",
+    "storage",
+    "tabs"
+  ],
+  "optional_host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
+  "action": {
+    "default_title": "PT Checkmate",
+    "default_popup": "popup.html"
+  },
+  "background": {
+    "service_worker": "src/background.js"
+  },
+  "options_page": "options.html"
+}

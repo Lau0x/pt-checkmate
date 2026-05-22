@@ -56,7 +56,9 @@ function renderSites() {
   currentSites.forEach((site, index) => {
     const node = template.content.cloneNode(true);
     const card = node.querySelector(".siteCard");
+    const title = node.querySelector("[data-role='siteTitle']");
     card.dataset.index = String(index);
+    title.textContent = site.name || `站点 ${index + 1}`;
 
     for (const input of node.querySelectorAll("[data-field]")) {
       const field = input.dataset.field;
@@ -71,6 +73,9 @@ function renderSites() {
           currentSites[index][field] = input.checked;
         } else {
           currentSites[index][field] = input.value;
+          if (field === "name") {
+            title.textContent = input.value.trim() || `站点 ${index + 1}`;
+          }
         }
       });
     }

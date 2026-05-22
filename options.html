@@ -40,7 +40,7 @@
           </label>
 
           <label>
-            <span>巡检后关闭标签页</span>
+            <span>完成后关闭</span>
             <select id="closeTabs">
               <option value="true">关闭</option>
               <option value="false">保留</option>
@@ -70,11 +70,18 @@
     <template id="siteTemplate">
       <article class="siteCard">
         <div class="siteCardHeader">
-          <label class="enabledLine">
-            <input data-field="enabled" type="checkbox">
-            <span>启用</span>
-          </label>
-          <button data-action="remove" type="button" class="textButton">删除</button>
+          <div class="siteTitleBlock">
+            <strong data-role="siteTitle">站点</strong>
+            <span>启用后参与自动巡检</span>
+          </div>
+          <div class="siteActions">
+            <label class="switchLine">
+              <input data-field="enabled" type="checkbox">
+              <span class="switchTrack" aria-hidden="true"></span>
+              <span>启用</span>
+            </label>
+            <button data-action="remove" type="button" class="textButton">删除</button>
+          </div>
         </div>
 
         <div class="formGrid">

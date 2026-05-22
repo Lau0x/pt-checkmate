@@ -7,6 +7,7 @@
   --line: #dce1e8;
   --accent: #0f766e;
   --accent-dark: #0b5f59;
+  --accent-soft: #d8f3ee;
   --danger: #b42318;
   font-family: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
@@ -51,8 +52,9 @@ button {
 }
 
 .optionsShell {
-  width: min(980px, 100%);
+  width: min(1080px, 100%);
   margin: 0 auto;
+  padding-block: 22px 32px;
 }
 
 .topbar,
@@ -136,14 +138,19 @@ button {
 
 .panel,
 .siteCard {
-  padding: 16px;
+  padding: 18px;
 }
 
-.settingGrid,
+.settingGrid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+}
+
 .formGrid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 14px;
+  gap: 16px;
 }
 
 .siteList {
@@ -153,7 +160,7 @@ button {
 
 .siteCard {
   display: grid;
-  gap: 14px;
+  gap: 16px;
 }
 
 label {
@@ -162,10 +169,82 @@ label {
   color: var(--muted);
 }
 
-.enabledLine {
+.siteCardHeader {
+  min-height: 44px;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--line);
+}
+
+.siteTitleBlock {
+  display: grid;
+  gap: 3px;
+}
+
+.siteTitleBlock strong {
+  color: var(--text);
+  font-size: 16px;
+  line-height: 1.25;
+}
+
+.siteTitleBlock span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.siteActions,
+.switchLine {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
+}
+
+.switchLine {
+  color: var(--text);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.switchLine input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  opacity: 0;
+}
+
+.switchTrack {
+  position: relative;
+  display: inline-flex;
+  width: 42px;
+  height: 24px;
+  border-radius: 999px;
+  background: #d8dee8;
+  transition: background .16s ease;
+}
+
+.switchTrack::after {
+  content: "";
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: white;
+  box-shadow: 0 1px 3px rgba(23, 32, 42, .22);
+  transition: transform .16s ease;
+}
+
+.switchLine input:checked + .switchTrack {
+  background: var(--accent);
+}
+
+.switchLine input:checked + .switchTrack::after {
+  transform: translateX(18px);
+}
+
+.switchLine input:focus-visible + .switchTrack {
+  outline: 3px solid var(--accent-soft);
+  outline-offset: 2px;
 }
 
 input,
@@ -177,6 +256,14 @@ textarea {
   padding: 9px 10px;
   color: var(--text);
   background: white;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+  outline: none;
 }
 
 textarea {
@@ -211,6 +298,12 @@ textarea {
   color: var(--text);
 }
 
+@media (max-width: 900px) {
+  .settingGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
 @media (max-width: 760px) {
   .settingGrid,
   .formGrid {
@@ -220,5 +313,15 @@ textarea {
   .pageHeader {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .siteCardHeader {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .siteActions {
+    justify-content: space-between;
+    width: 100%;
   }
 }

@@ -19,12 +19,24 @@
 
 ## 安装
 
-1. 下载或克隆这个仓库
-2. 打开 Chrome，进入 `chrome://extensions`
-3. 开启右上角「开发者模式」
-4. 点击「加载已解压的扩展程序」
-5. 选择这个仓库目录
-6. 打开扩展设置页，填写站点并点击「保存并授权」
+### 方式一：下载发布包
+
+1. 打开 [Releases](https://github.com/Lau0x/pt-checkmate/releases/latest)
+2. 下载 `pt-checkmate-v0.1.0.zip`
+3. 解压这个 zip 文件
+4. 打开 Chrome，进入 `chrome://extensions`
+5. 开启右上角「开发者模式」
+6. 点击「加载已解压的扩展程序」
+7. 选择解压后的 `pt-checkmate` 文件夹
+8. 打开扩展设置页，填写站点并点击「保存并授权」
+
+### 方式二：从源码加载
+
+```bash
+git clone https://github.com/Lau0x/pt-checkmate.git
+```
+
+然后在 Chrome 的 `chrome://extensions` 页面里加载这个仓库目录。
 
 ## 配置项
 

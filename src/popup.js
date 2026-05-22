@@ -6,7 +6,7 @@ const results = document.querySelector("#results");
 
 document.addEventListener("DOMContentLoaded", render);
 runNow.addEventListener("click", runAll);
-openOptions.addEventListener("click", () => chrome.runtime.openOptionsPage());
+openOptions.addEventListener("click", openSettings);
 chrome.storage.onChanged.addListener(render);
 
 async function render() {
@@ -50,7 +50,7 @@ async function runAll() {
   const enabledSites = (Array.isArray(sites) ? sites : []).filter((site) => site.enabled !== false);
 
   if (!enabledSites.length) {
-    chrome.runtime.openOptionsPage();
+    openSettings();
     return;
   }
 
@@ -90,6 +90,13 @@ function originFromUrl(value) {
   } catch {
     return "";
   }
+}
+
+function openSettings() {
+  chrome.tabs.create({
+    active: true,
+    url: chrome.runtime.getURL("options.html")
+  });
 }
 
 function formatTime(value) {

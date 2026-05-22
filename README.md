@@ -22,7 +22,7 @@
 ### 方式一：下载发布包
 
 1. 打开 [Releases](https://github.com/Lau0x/pt-checkmate/releases/latest)
-2. 下载 `pt-checkmate-v0.1.0.zip`
+2. 下载 `pt-checkmate-v0.1.1.zip`
 3. 解压这个 zip 文件
 4. 打开 Chrome，进入 `chrome://extensions`
 5. 开启右上角「开发者模式」
@@ -37,6 +37,20 @@ git clone https://github.com/Lau0x/pt-checkmate.git
 ```
 
 然后在 Chrome 的 `chrome://extensions` 页面里加载这个仓库目录。
+
+## 打开设置页
+
+安装后有三种入口：
+
+1. 点击浏览器工具栏里的 PT Checkmate 图标，再点「设置」
+2. 在 `chrome://extensions` 找到 PT Checkmate，点击「详情」，再点「扩展程序选项」
+3. 直接打开扩展设置页地址：`chrome-extension://扩展ID/options.html`
+
+扩展 ID 可以在 `chrome://extensions` 里看到。不同用户本地安装生成的 ID 可能不同。
+
+## 浏览器兼容
+
+主要支持 Chrome 和 Chromium 内核浏览器，例如 Edge、Brave、Arc。Firefox 没有作为当前目标浏览器测试。
 
 ## 配置项
 

@@ -14,10 +14,30 @@ const DEFAULT_KEYWORDS = [
   "attendance"
 ];
 
+const DEFAULT_DONE_KEYWORDS = [
+  "已签到",
+  "已签",
+  "今日已签到",
+  "今天已签到",
+  "今日已签",
+  "已经签到",
+  "已打卡",
+  "已领取",
+  "已領取",
+  "已完成",
+  "签到成功",
+  "簽到成功",
+  "checked in",
+  "already checked",
+  "already claimed",
+  "completed"
+];
+
 const DEFAULT_SETTINGS = {
   autoRun: true,
   periodDays: 21,
   scheduleTime: "11:00",
+  visitMode: "background",
   closeTabs: true,
   tabActive: false
 };
@@ -223,11 +243,15 @@ async function runSite(site, settings) {
     });
   }
 
+  if (settings.visitMode === "request") {
+    return requestSite(site, targetUrl);
+  }
+
   let tab;
 
   try {
     tab = await chrome.tabs.create({
-      active: Boolean(settings.tabActive),
+      active: settings.visitMode === "foreground" || Boolean(settings.tabActive),
       url: targetUrl
     });
 
@@ -240,6 +264,7 @@ async function runSite(site, settings) {
         {
           name: site.name,
           keywords: splitList(site.keywords).concat(DEFAULT_KEYWORDS),
+          doneKeywords: DEFAULT_DONE_KEYWORDS,
           selectors: splitList(site.selectors),
           waitSeconds: Number(site.waitSeconds || 3)
         }
@@ -266,6 +291,42 @@ async function runSite(site, settings) {
     if (settings.closeTabs && tab?.id) {
       chrome.tabs.remove(tab.id).catch(() => {});
     }
+  }
+}
+
+async function requestSite(site, targetUrl) {
+  let timeout;
+
+  try {
+    const controller = new AbortController();
+    timeout = setTimeout(() => controller.abort(), 20000);
+    const response = await fetch(targetUrl, {
+      credentials: "include",
+      redirect: "follow",
+      signal: controller.signal
+    });
+
+    const contentType = response.headers.get("content-type") || "";
+    const text = contentType.includes("text/html") ? await response.clone().text() : "";
+    const lowerText = text.toLowerCase();
+    const needsLogin = lowerText.includes("type=\"password\"")
+      || lowerText.includes("type='password'")
+      || /\/login|login\.php|signin|sign-in/.test(response.url.toLowerCase());
+
+    return buildResult(site, {
+      url: response.url || targetUrl,
+      status: needsLogin ? "可能需要手动登录" : "已请求访问",
+      detail: `HTTP ${response.status}${response.redirected ? "，发生跳转" : ""}。仅请求模式不会执行网页 JS 或点击签到按钮。`,
+      clicked: false
+    });
+  } catch (error) {
+    return buildResult(site, {
+      url: targetUrl,
+      status: "失败",
+      detail: `仅请求失败：${error.message}`
+    });
+  } finally {
+    if (timeout) clearTimeout(timeout);
   }
 }
 
@@ -376,11 +437,21 @@ async function inspectAndCheckIn(config) {
     };
   }
 
+  const doneStatus = findDoneStatus(config.doneKeywords || []);
+  if (doneStatus) {
+    return {
+      url: location.href,
+      title: document.title,
+      status: "已签到",
+      detail: `页面显示：${doneStatus}`,
+      clicked: false
+    };
+  }
+
   const bySelector = findBySelectors(config.selectors || []);
   if (bySelector) {
     const clickedText = getElementText(bySelector);
     bySelector.click();
-    await sleep(2500);
 
     return {
       url: location.href,
@@ -396,7 +467,6 @@ async function inspectAndCheckIn(config) {
   if (byKeyword) {
     const clickedText = getElementText(byKeyword);
     byKeyword.click();
-    await sleep(2500);
 
     return {
       url: location.href,
@@ -426,6 +496,40 @@ async function inspectAndCheckIn(config) {
       }
     }
     return null;
+  }
+
+  function findDoneStatus(doneKeywords) {
+    const normalizedDoneKeywords = doneKeywords
+      .map((item) => String(item).trim().toLowerCase())
+      .filter(Boolean);
+
+    const candidates = Array.from(
+      document.querySelectorAll([
+        "button",
+        "a",
+        "input[type='button']",
+        "input[type='submit']",
+        "[role='button']",
+        ".button",
+        ".btn",
+        ".alert",
+        ".notice",
+        ".message",
+        ".modal",
+        ".dialog"
+      ].join(","))
+    );
+
+    for (const element of candidates) {
+      if (!isVisible(element)) continue;
+      const text = getElementText(element).toLowerCase();
+      const matched = normalizedDoneKeywords.find((keyword) => text.includes(keyword));
+      if (matched) return getElementText(element) || matched;
+    }
+
+    const bodyText = String(document.body?.innerText || "").toLowerCase();
+    const matched = normalizedDoneKeywords.find((keyword) => bodyText.includes(keyword));
+    return matched || "";
   }
 
   function findByKeywords(keywords) {

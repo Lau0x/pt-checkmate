@@ -22,7 +22,7 @@
 ### 方式一：下载发布包
 
 1. 打开 [Releases](https://github.com/Lau0x/pt-checkmate/releases/latest)
-2. 下载 `pt-checkmate-v0.1.1.zip`
+2. 下载 `pt-checkmate-v0.1.2.zip`
 3. 解压这个 zip 文件
 4. 打开 Chrome，进入 `chrome://extensions`
 5. 开启右上角「开发者模式」
@@ -60,7 +60,13 @@ git clone https://github.com/Lau0x/pt-checkmate.git
 - 间隔天数：默认 `21`，建议小于站点要求的最长未登录天数
 - 巡检时间：默认 `11:00`，按本机 Chrome 的本地时间执行
 - 巡检后关闭标签页：默认关闭，避免留下很多标签页
-- 打开标签页：默认后台打开
+- 访问方式：默认后台打开
+
+访问方式有三种：
+
+- 后台打开：打开新标签页但不抢焦点，适合日常巡检和自动签到
+- 前台打开：打开并切到新标签页，适合首次测试和排查问题
+- 仅请求：不打开标签页，只请求站点 URL；适合只需要访问保活的站点，不会执行网页 JS，也不会点击签到按钮
 
 ### 站点设置
 

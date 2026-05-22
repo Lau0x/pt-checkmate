@@ -2,6 +2,7 @@ const DEFAULT_SETTINGS = {
   autoRun: true,
   periodDays: 21,
   scheduleTime: "11:00",
+  visitMode: "background",
   closeTabs: true,
   tabActive: false
 };
@@ -15,7 +16,7 @@ const autoRun = document.querySelector("#autoRun");
 const periodDays = document.querySelector("#periodDays");
 const scheduleTime = document.querySelector("#scheduleTime");
 const closeTabs = document.querySelector("#closeTabs");
-const tabActive = document.querySelector("#tabActive");
+const visitMode = document.querySelector("#visitMode");
 
 let currentSites = [];
 
@@ -40,7 +41,7 @@ async function load() {
   periodDays.value = String(finalSettings.periodDays);
   scheduleTime.value = finalSettings.scheduleTime || "11:00";
   closeTabs.value = String(finalSettings.closeTabs);
-  tabActive.value = String(finalSettings.tabActive);
+  visitMode.value = finalSettings.visitMode || (finalSettings.tabActive ? "foreground" : "background");
 
   renderSites();
 }
@@ -128,8 +129,9 @@ async function save() {
     autoRun: autoRun.value === "true",
     periodDays: clamp(Number(periodDays.value || 21), 1, 29),
     scheduleTime: scheduleTime.value || "11:00",
+    visitMode: visitMode.value || "background",
     closeTabs: closeTabs.value === "true",
-    tabActive: tabActive.value === "true"
+    tabActive: visitMode.value === "foreground"
   };
 
   await storageSet({

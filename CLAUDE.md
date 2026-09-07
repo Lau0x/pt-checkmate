@@ -6,7 +6,7 @@ PT Checkmate is a local Chrome / Chromium extension for periodically visiting co
 
 Repository: https://github.com/Lau0x/pt-checkmate
 
-Current public release: `v0.1.3`
+Current public release: `v0.1.4`
 
 ## Core Principles
 

@@ -43,6 +43,9 @@ const DEFAULT_SETTINGS = {
 };
 
 const CHECK_ALARM = "pt-auto-check";
+const ACTIVE_RUN_TTL_MS = 30 * 60 * 1000;
+const TAB_LOAD_TIMEOUT_MS = 25 * 1000;
+const SCRIPT_TIMEOUT_MS = 30 * 1000;
 
 chrome.runtime.onInstalled.addListener(async () => {
   const stored = await chrome.storage.local.get(["sites", "settings", "runs"]);
@@ -55,10 +58,12 @@ chrome.runtime.onInstalled.addListener(async () => {
     await chrome.storage.local.set({ settings: DEFAULT_SETTINGS });
   }
 
+  await clearStaleActiveRun();
   await syncAlarm();
 });
 
 chrome.runtime.onStartup.addListener(async () => {
+  await clearStaleActiveRun();
   const didRun = await runIfOverdue("开机补跑");
   if (!didRun) {
     await syncAlarm();
@@ -123,7 +128,7 @@ async function runIfOverdue(source) {
   const { settings, schedule, activeRun } = await chrome.storage.local.get(["settings", "schedule", "activeRun"]);
   const finalSettings = { ...DEFAULT_SETTINGS, ...settings };
 
-  if (!finalSettings.autoRun || activeRun?.status === "running") {
+  if (!finalSettings.autoRun || (activeRun?.status === "running" && !isActiveRunStale(activeRun))) {
     return false;
   }
 
@@ -188,19 +193,29 @@ async function runAllSites(source) {
     }
   });
 
-  for (const site of enabledSites) {
-    const result = await runSite(site, finalSettings);
-    results.push(result);
+  try {
+    for (const site of enabledSites) {
+      const result = await runSite(site, finalSettings);
+      results.push(result);
 
-    await chrome.storage.local.set({
-      activeRun: {
-        source,
-        startedAt,
-        status: "running",
-        total: enabledSites.length,
-        completed: results.length,
-        latest: result
-      }
+      await chrome.storage.local.set({
+        activeRun: {
+          source,
+          startedAt,
+          status: "running",
+          total: enabledSites.length,
+          completed: results.length,
+          latest: result
+        }
+      });
+    }
+  } catch (error) {
+    results.push({
+      name: "巡检任务",
+      checkedAt: new Date().toISOString(),
+      status: "失败",
+      detail: error.message || String(error),
+      clicked: false
     });
   }
 
@@ -250,28 +265,40 @@ async function runSite(site, settings) {
   let tab;
 
   try {
-    tab = await chrome.tabs.create({
-      active: settings.visitMode === "foreground" || Boolean(settings.tabActive),
-      url: targetUrl
-    });
+    tab = await withTimeout(
+      chrome.tabs.create({
+        active: settings.visitMode === "foreground" || Boolean(settings.tabActive),
+        url: targetUrl
+      }),
+      TAB_LOAD_TIMEOUT_MS,
+      "打开标签页超时"
+    );
 
-    await waitForTabComplete(tab.id);
+    await withTimeout(waitForTabComplete(tab.id), TAB_LOAD_TIMEOUT_MS, "页面加载超时");
 
-    const [injection] = await chrome.scripting.executeScript({
-      target: { tabId: tab.id },
-      func: inspectAndCheckIn,
-      args: [
-        {
-          name: site.name,
-          keywords: splitList(site.keywords).concat(DEFAULT_KEYWORDS),
-          doneKeywords: DEFAULT_DONE_KEYWORDS,
-          selectors: splitList(site.selectors),
-          waitSeconds: Number(site.waitSeconds || 3)
-        }
-      ]
-    });
+    const [injection] = await withTimeout(
+      chrome.scripting.executeScript({
+        target: { tabId: tab.id },
+        func: inspectAndCheckIn,
+        args: [
+          {
+            name: site.name,
+            keywords: splitList(site.keywords).concat(DEFAULT_KEYWORDS),
+            doneKeywords: DEFAULT_DONE_KEYWORDS,
+            selectors: splitList(site.selectors),
+            waitSeconds: Number(site.waitSeconds || 3)
+          }
+        ]
+      }),
+      SCRIPT_TIMEOUT_MS,
+      "页面巡检脚本超时"
+    );
 
     const value = injection?.result || {};
+
+    if (value.clicked) {
+      await sleep(2500);
+    }
 
     return buildResult(site, {
       url: value.url || targetUrl,
@@ -420,6 +447,33 @@ function getNextRunAfter(baseDate, settings) {
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
+}
+
+async function clearStaleActiveRun() {
+  const { activeRun } = await chrome.storage.local.get("activeRun");
+  if (isActiveRunStale(activeRun)) {
+    await chrome.storage.local.set({ activeRun: null });
+  }
+}
+
+function isActiveRunStale(activeRun) {
+  if (activeRun?.status !== "running") return false;
+
+  const startedAt = Date.parse(activeRun.startedAt || "");
+  return !Number.isFinite(startedAt) || Date.now() - startedAt > ACTIVE_RUN_TTL_MS;
+}
+
+function withTimeout(promise, timeoutMs, message) {
+  return new Promise((resolve, reject) => {
+    const timeout = setTimeout(() => reject(new Error(message)), timeoutMs);
+    Promise.resolve(promise)
+      .then(resolve, reject)
+      .finally(() => clearTimeout(timeout));
+  });
+}
+
+function sleep(ms) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function inspectAndCheckIn(config) {

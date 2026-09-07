@@ -3,6 +3,7 @@ const openOptions = document.querySelector("#openOptions");
 const siteCount = document.querySelector("#siteCount");
 const runState = document.querySelector("#runState");
 const results = document.querySelector("#results");
+const ACTIVE_RUN_TTL_MS = 30 * 60 * 1000;
 
 document.addEventListener("DOMContentLoaded", render);
 runNow.addEventListener("click", runAll);
@@ -14,9 +15,12 @@ async function render() {
   const enabledCount = (Array.isArray(sites) ? sites : []).filter((site) => site.enabled !== false).length;
   siteCount.textContent = enabledCount ? `${enabledCount} 个站点已启用` : "还没有配置站点";
 
-  if (activeRun?.status === "running") {
+  if (activeRun?.status === "running" && !isActiveRunStale(activeRun)) {
     runState.textContent = `运行中：${activeRun.completed}/${activeRun.total}`;
     runNow.disabled = true;
+  } else if (isActiveRunStale(activeRun)) {
+    runState.textContent = "上次巡检中断，可重新巡检";
+    runNow.disabled = false;
   } else {
     runState.textContent = "未运行";
     runNow.disabled = false;
@@ -115,4 +119,11 @@ function escapeHtml(value) {
     .replaceAll("<", "&lt;")
     .replaceAll(">", "&gt;")
     .replaceAll("\"", "&quot;");
+}
+
+function isActiveRunStale(activeRun) {
+  if (activeRun?.status !== "running") return false;
+
+  const startedAt = Date.parse(activeRun.startedAt || "");
+  return !Number.isFinite(startedAt) || Date.now() - startedAt > ACTIVE_RUN_TTL_MS;
 }

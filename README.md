@@ -22,7 +22,7 @@
 ### 方式一：下载发布包
 
 1. 打开 [Releases](https://github.com/Lau0x/pt-checkmate/releases/latest)
-2. 下载 `pt-checkmate-v0.1.3.zip`
+2. 下载 `pt-checkmate-v0.1.4.zip`
 3. 解压这个 zip 文件
 4. 打开 Chrome，进入 `chrome://extensions`
 5. 开启右上角「开发者模式」
